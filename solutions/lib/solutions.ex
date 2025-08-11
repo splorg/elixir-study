@@ -1,0 +1,2 @@
+defmodule Solutions do
+end
