@@ -3,7 +3,29 @@ defmodule ModuleNamespace.ModuleName do
   This is an example of a module inside a namespace.
   """
 
+  # use "only: [function_name: arity]" to import only the function you need
+  import ModuleNamespace.Utilities, only: [format_date: 1]
+  # use alias to import a module with a different name
+  alias Calculations.EngagementCalculator, as: Calc
+
+  # use require to import a macro
+  require ModuleNamespace.ReportMacros
+
+  # use use to import a module's behavior
+  use ModuleNamespace.ReportSetup
+
   @constant_value 123
+
+  def generate_report do
+    "Report generated on #{format_date(Date.utc_today())}"
+  end
+
+  def generate_engagement_report do
+    ModuleNamespace.ReportMacros.log_report_generation("engagement")
+    engagement_calculation = Calc.calculate_engagement()
+
+    "Engagement report: #{engagement_calculation}, date: #{format_date(Date.utc_today())}, header: #{header()}"
+  end
 
   # function/0 -> arity 0 (no parameters)
   def function do
