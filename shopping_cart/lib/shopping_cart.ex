@@ -8,7 +8,7 @@ defmodule ShoppingCart do
       nil ->
         {:error, "Product not found"}
 
-      product when product.quantity >= amount ->
+      %Product{} = product when product.quantity >= amount ->
         new_cart = [{product.name, amount} | cart]
         new_inventory = InventoryManager.update_inventory(inventory, product_name, amount)
         {:ok, new_cart, new_inventory}

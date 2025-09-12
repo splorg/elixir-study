@@ -8,7 +8,7 @@ defmodule InventoryManager do
   end
 
   defp find_product([], _), do: nil
-  defp find_product([%{name: name} = product | _tail], name), do: product
+  defp find_product([%Product{name: name} = product | _tail], name), do: product
 
   defp find_product([_product | rest_inventory], name), do: find_product(rest_inventory, name)
 
@@ -31,7 +31,7 @@ defmodule InventoryManager do
   defp update_products([product | rest_inventory], name, amount, updated_inventory) do
     updated_product =
       if product.name == name do
-        %{product | quantity: product.quantity - amount}
+        %Product{product | quantity: product.quantity - amount}
       else
         product
       end
