@@ -65,4 +65,14 @@ defmodule InventoryManager do
 
     restock_products(rest_inventory, [updated_product | restocked_inventory])
   end
+
+  def update_supplier_phone(inventory, product_name, phone) do
+    Enum.map(inventory, fn product ->
+      if product.name == product_name do
+        %Product{product | supplier: %{product.supplier | phone: phone}}
+      else
+        product
+      end
+    end)
+  end
 end
