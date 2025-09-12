@@ -3,12 +3,35 @@ defmodule ShoppingCart do
   Documentation for `ShoppingCart`.
   """
 
-  def add_item(cart, item = %{name: _, price: _}) do
-    [item | cart]
+  def add_item(cart, product_name, amount, inventory) do
+    case InventoryManager.get_product(inventory, product_name) do
+      nil ->
+        {:error, "Product not found"}
+
+      product when product.quantity >= amount ->
+        new_cart = [{product.name, amount} | cart]
+        new_inventory = InventoryManager.update_inventory(inventory, product_name, amount)
+        {:ok, new_cart, new_inventory}
+
+      _ ->
+        {:error, :insufficient_stock}
+    end
   end
 
-  def remove_item(cart, item = %{name: _, price: _}) do
-    List.delete(cart, item)
+  def remove_item(cart, product_name, inventory) do
+    case InventoryManager.get_product(inventory, product_name) do
+      nil ->
+        {:error, "Product not found"}
+
+      product ->
+        {_, item_quantity} = Enum.find(cart, fn {name, _} -> name == product.name end)
+        new_cart = Enum.filter(cart, fn {name, _} -> name != product.name end)
+
+        new_inventory =
+          InventoryManager.update_inventory(inventory, product.name, -item_quantity)
+
+        {:ok, new_cart, new_inventory}
+    end
   end
 
   def remove_first([_ | tail]) do
@@ -23,12 +46,16 @@ defmodule ShoppingCart do
     List.last(cart)
   end
 
-  def get_total(cart, discount \\ 0) do
-    # Normal anonymous function
-    # List.foldl(cart, 0, fn item, total -> total + item.price end)
+  def get_total(cart, inventory, discount \\ 0) do
+    List.foldl(cart, 0, fn {name, amount}, total ->
+      case InventoryManager.get_product(inventory, name) do
+        nil ->
+          {:error, "Product not found"}
 
-    # Shorthand anonymous function with capture operator
-    List.foldl(cart, 0, &(&1.price + &2))
+        product ->
+          total + product.price * amount
+      end
+    end)
     |> subtract_discount(discount)
   end
 
